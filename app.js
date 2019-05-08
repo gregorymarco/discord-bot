@@ -3,13 +3,11 @@
  * 
  * Ponderous man: a discord presence-based queueing bot.
  * 
- * Version 0.1
+ * Version 1.0: First test
  * 
  * End goal: 
  * 
- * A bot that lets you immediately find people on your friends list who are LFG
- * 
- * Todo: Add permissions-based access
+ * A bot that lets you immediately find people using the service who are LFG in the game you are playing
  * 
  */
 
@@ -24,12 +22,10 @@ queue = []
 client.on('ready', () => {
     console.log("Connected as " + client.user.tag)
 })
-
 //routes all messages that the bot will see
 client.on('message', message => {
     moreEfficientMessageRouter(message);
 });
-
 //router for all messages for the bot
 function moreEfficientMessageRouter(message) {
     //check to see if their message starts with the command to respond to
@@ -74,7 +70,7 @@ function moreEfficientMessageRouter(message) {
                         break;
     }
 }
-
+//sends message based on cmd to all subscribed channels
 function updateSubscribers(message, cmd){
     game = message.author.presence.game;
     gamesubs = subscribers[game];
@@ -91,11 +87,10 @@ function updateSubscribers(message, cmd){
         client.channels.get(gamesubs[i]).send(message.author.username + action);
     }
 }
-
+//help message
 function helpMessage(message){
     message.channel.send('Current command to listen for: ' + commandp + "\nCommand list:\nping\n\tpong\nregisterchannel <channelID> <game title>\n\tRegister a channel to output changes to a game\'s queue. You can get your channel id using developer mode.\nhelp\n\tprints the help message\nenqueue\n\tPuts you into the queue for whatever game you are playing. You can only enter a queue once and you must be playing a game to do so.\ndequeue\n\tRemoves you from the queue for whatever game you are playing.\nqueuestatus\n\tDisplays the status of the queue for whatever game you are playing.");
 }
-
 //put the user in the queue of whatever game they are playing
 function enqueueUser(message){
     person = message.author;
@@ -113,7 +108,6 @@ function enqueueUser(message){
     //describe the queue
     displayQueueStatus(message)
 }
-
 //remove the user from the queue for whatever game they are playing
 function dequeueUser(message){
     person = message.author;
@@ -131,7 +125,6 @@ function dequeueUser(message){
     message.channel.send('Removed you from the ' + game + ' queue');
     return;
 }
-
 //display the status for the queue of the game they are playing
 function displayQueueStatus(message){
     game = message.author.presence.game;
@@ -141,16 +134,28 @@ function displayQueueStatus(message){
     }
     message.channel.send(msg);
 }
-
 //ping
 function pong(message){
         message.channel.send('pong');
         return;
 }
+//register a channel to a game and update that channel whenever someone does something to that queue
+async function registerChannel(message) {
+    //verify permissions before people register a channel
+    if(!(message.guild.available)) return;
+    let member = await message.guild.fetchMember(message.author)
+    if(member === 'undefined'){
+        message.channel.send('Failed to evaluate this user\'s permissions.')
+        return;
+    }
+    mp = member.hasPermission(0x00000008);
+    if(!mp){
+        message.channel.send('You are not an administrator. Only server admins are allowed to do this.');
+        return;
+    }
 
-function registerChannel(message) {
     channelToRegister = message.content.trim().split(" ", 2)[1];
-    gameToRegister = message.content.trim().split(" ", 3)[2];
+    gameToRegister = message.content.trim().split(" ", 3)[2];    
     if(typeof channelToRegister === 'undefined' || typeof client.channels.get(channelToRegister) === 'undefined'){
         message.channel.send('Incorrect channel id');
         return;
@@ -159,9 +164,9 @@ function registerChannel(message) {
         message.channel.send('That game has not yet been registered. If someone plays this game I will allow you to register it.');
         return;
     }
+
     //make sure they are not already in the queue
     if(typeof subscribers[gameToRegister] === 'undefined') subscribers[gameToRegister]=[]
-    
     var inqueue = subscribers[gameToRegister].findIndex(function(el) {
         return el = channelToRegister;
     });
@@ -172,6 +177,5 @@ function registerChannel(message) {
     client.channels.get(channelToRegister).send(':thinking: aloud on this channel\nWhen there is a change to the ' + gameToRegister + ' queue it will be posted here')
     subscribers[gameToRegister].push(channelToRegister);
 }
-
 //log in to the server
 client.login(TOKEN)
