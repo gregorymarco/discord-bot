@@ -42,7 +42,11 @@ function moreEfficientMessageRouter(message) {
         case 'registerchannel': 
                         registerChannel(message)
                         break;
-        case 'help':    helpMessage(message)
+        case 'help':    
+                        helpMessage(message)
+                        break;
+        case 'unregisterchannel': 
+                        unregisterChannel(message)
                         break;
     }
     //these commands that require the rich presence game to be active
@@ -123,7 +127,6 @@ function dequeueUser(message){
     //remove them from the queue
     queue[game].splice(inqueue, 1);
     message.channel.send('Removed you from the ' + game + ' queue');
-    return;
 }
 //display the status for the queue of the game they are playing
 function displayQueueStatus(message){
@@ -139,20 +142,25 @@ function pong(message){
         message.channel.send('pong');
         return;
 }
-//register a channel to a game and update that channel whenever someone does something to that queue
-async function registerChannel(message) {
-    //verify permissions before people register a channel
-    if(!(message.guild.available)) return;
+//returns true/false whether or not the sender of the message is admin on the server they sent it on
+async function isAdmin(message){
+    if(!(message.guild.available)) return false;
     let member = await message.guild.fetchMember(message.author)
     if(member === 'undefined'){
         message.channel.send('Failed to evaluate this user\'s permissions.')
-        return;
+        return false;
     }
     mp = member.hasPermission(0x00000008);
     if(!mp){
         message.channel.send('You are not an administrator. Only server admins are allowed to do this.');
-        return;
+        return false;
     }
+    return true;
+}
+//register a channel to a game and update that channel whenever someone does something to that queue
+async function registerChannel(message) {
+    //verify permissions before people register a channel
+    if(!isAdmin) return;
 
     channelToRegister = message.content.trim().split(" ", 2)[1];
     gameToRegister = message.content.trim().split(" ", 3)[2];    
@@ -176,6 +184,30 @@ async function registerChannel(message) {
     }
     client.channels.get(channelToRegister).send(':thinking: aloud on this channel\nWhen there is a change to the ' + gameToRegister + ' queue it will be posted here')
     subscribers[gameToRegister].push(channelToRegister);
+}
+//unregister a channel from the subscription list
+async function unregisterChannel(message){
+    if(!isAdmin(message)) return;
+    channelToRegister = message.content.trim().split(" ", 2)[1];
+    gameToRegister = message.content.trim().split(" ", 3)[2];    
+    if(typeof channelToRegister === 'undefined' || typeof client.channels.get(channelToRegister) === 'undefined'){
+        message.channel.send('Incorrect channel id');
+        return;
+    }
+    if(typeof gameToRegister === 'undefined' || typeof queue[gameToRegister] === 'undefined'){
+        message.channel.send('That game has not yet been registered. If someone plays this game I will allow you to register it.');
+        return;
+    }
+    var inqueue = subscribers[gameToRegister].findIndex(function(el) {
+        return el = channelToRegister;
+    });
+    if(!(inqueue === -1)) {
+        message.channel.send('Removing you from the ' + gameToRegister + ' subscription');
+        subscribers[gameToRegister].splice(inqueue, 1);
+        return;
+    } else {
+        message.channel.send('There is no ' + gameToRegister + ' subscription registered for this channel');
+    }
 }
 //log in to the server
 client.login(TOKEN)
