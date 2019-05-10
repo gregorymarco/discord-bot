@@ -1,1 +1,15 @@
+Commands: 
+ping
+    pong
+registerchannel <channelID> <game title>
+    Register a channel to output changes to a game's queue.
+help
+    prints the help message
+enqueue
+    Puts you into the queue for whatever game you are playing. You can only enter a queue once and you must be playing the game to do so.
+dequeue
+    Removes you from the queue for whatever game you are playing.
+queuestatus
+    Displays the status of the queue for whatever game you are playing.
+
 To run the bot you need to insert your bot's login token into config.js
