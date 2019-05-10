@@ -2,7 +2,9 @@ Commands:
 ping
     pong
 registerchannel <channelID> <game title>
-    Register a channel to output changes to a game's queue.
+    Subscribe a channel to see changes to a game's queue.
+unregisterchannel <channelID> <game title>
+    Unsubscribe a channel from changes to a game's queue
 help
     prints the help message
 enqueue

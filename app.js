@@ -93,7 +93,7 @@ function updateSubscribers(message, cmd){
 }
 //help message
 function helpMessage(message){
-    message.channel.send('Current command to listen for: ' + commandp + "\nCommand list:\nping\n\tpong\nregisterchannel <channelID> <game title>\n\tRegister a channel to output changes to a game\'s queue. You can get your channel id using developer mode.\nhelp\n\tprints the help message\nenqueue\n\tPuts you into the queue for whatever game you are playing. You can only enter a queue once and you must be playing a game to do so.\ndequeue\n\tRemoves you from the queue for whatever game you are playing.\nqueuestatus\n\tDisplays the status of the queue for whatever game you are playing.");
+    message.channel.send('Current command to listen for: ' + commandp + "\nCommand list:\nping\n\tpong\nregisterchannel <channelID> <game title>\n\tRegister a channel to output changes to a game\'s queue. You can get your channel id using developer mode.\nhelp\n\tprints the help message\nenqueue\n\tPuts you into the queue for whatever game you are playing. You can only enter a queue once and you must be playing a game to do so.\ndequeue\n\tRemoves you from the queue for whatever game you are playing.\nqueuestatus\n\tDisplays the status of the queue for whatever game you are playing.\nunregisterchannel <channelID> <game title>\n\tUnsubscribe a channel from changes to a game\'s queue.");
 }
 //put the user in the queue of whatever game they are playing
 function enqueueUser(message){
